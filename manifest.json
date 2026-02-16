@@ -15,16 +15,6 @@
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "https://*.figma.com/file/*",
-        "https://*.figma.com/files/*",
-        "https://*.figma.com/design/*"
-      ],
-      "js": ["content-script.js", "export-analytics.js"]
-    }
-  ],
   "side_panel": {
     "default_path": "popup.html"
   },

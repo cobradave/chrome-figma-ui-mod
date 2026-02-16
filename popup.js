@@ -497,7 +497,7 @@ function generateMarkdown(data) {
   }
   
   md += `\n---\n\n`;
-  md += `*Exported from Figma Analytics Export (fna Figma UI Mod)*\n`;
+  md += `*Exported from Figma Analytics Export (formerly Figma UI Mod)*\n`;
   
   return md;
 }
