@@ -1,138 +1,187 @@
 * {
   box-sizing: border-box;
 }
-html,
 body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: Inter, sans-serif;
-  color: rgba(0, 0, 0, 0.9);
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
-  line-height: 24px;
-  letter-spacing: -0.003px;
-}
-body {
-  min-width: 20em;
-  min-height: 10em;
-  -webkit-font-smoothing: antialiased;
-}
-main,
-aside {
-  padding: 18px 16px;
-  display: grid;
+  color: #333;
+  margin: 0;
+  background: #f9f9f9;
 }
 h1 {
-  margin-block-start: 0em;
-  height: 48px;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #e5e5e5;
-  box-sizing: border-box;
+  gap: 8px;
+  color: #1a1a1a;
+}
+h1 span {
+  font-size: 20px;
+}
+
+/* Status messages */
+.status {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
   font-size: 12px;
-  font-weight: 600;
-  color: #333333;
-  padding: 0 16px;
-  margin-bottom: 0;
 }
+.status.info {
+  background: #e8f4fd;
+  color: #1a73e8;
+}
+.status.success {
+  background: #e6f4ea;
+  color: #1e8e3e;
+}
+.status.error {
+  background: #fce8e6;
+  color: #d93025;
+}
+.status.warning {
+  background: #fef7e0;
+  color: #f9ab00;
+}
+
+/* Buttons */
 button {
-  white-space: nowrap;
-  background-color: #0d99ff;
-  color: #fff;
-  font-weight: 600;
-  height: 40px;
-  border-radius: 6px;
-  box-sizing: border-box;
-  border: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   width: 100%;
-  font-size: 14px;
-  line-height: 24px;
-  letter-spacing: -0.006px;
-}
-button:hover {
-  box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.3);
-}
-button + button {
-  margin-top: 8px;
-}
-aside {
-  border-top: 1px solid #e5e5e5;
-}
-.textLink {
-  box-sizing: border-box;
+  padding: 12px 16px;
   border: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 24px;
-  padding: 4px;
-  text-align: center;
-  font-weight: 600;
-  height: 32px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.15s, border-color 0.15s;
+}
+button.primary {
+  background: #18a0fb;
+  color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+button.primary:hover {
+  background: #0d8de8;
+}
+button.secondary {
+  background: white;
+  color: #333;
+  border: 1px solid #e0e0e0;
+}
+button.secondary:hover {
+  background: #f5f5f5;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Component selector */
+.selector-label {
+  font-size: 12px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+select {
+  width: 100%;
+  padding: 8px;
   border-radius: 6px;
-  font-weight: 600;
-  color: darkslategray;
-  text-decoration: none;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  background: white;
 }
-.reportIssue {
+.selector-hint {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
 }
-.reportIssue:hover {
-  color: #0d99ff;
-}
-.textLink svg {
-  margin-right: 8px;
-  position: relative;
-}
-.reportIssue svg path {
-  color: darkslategray;
-}
-.reportIssue:hover svg path {
-  fill: #0d99ff;
+
+/* Export section */
+.export-section {
+  margin-top: 12px;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
 }
 .export-divider {
   display: flex;
   align-items: center;
-  margin: 12px 0 4px;
+  margin-bottom: 10px;
 }
 .export-divider span {
   font-size: 11px;
+  font-weight: 600;
   color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   white-space: nowrap;
 }
 .export-divider::after {
-  content: "";
+  content: '';
   flex: 1;
   height: 1px;
   background: #e5e5e5;
   margin-left: 8px;
 }
-button.export-alt {
-  background-color: transparent;
-  color: rgba(0, 0, 0, 0.8);
-  border: 1px solid #ccc;
+
+/* Preview */
+.preview {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 12px;
 }
-button.export-alt:hover {
-  background-color: #f5f5f5;
-  border-color: #0d99ff;
-  color: #0d99ff;
-  box-shadow: none;
+.preview h3 {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #666;
+  letter-spacing: 0.5px;
 }
-.donate {
-  background-color: #fd0;
-  margin-bottom: 8px;
+
+/* Footer */
+.footer {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  text-align: center;
 }
-.donate:hover {
-  box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.3);
+.footer-hint {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 10px;
+}
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #666;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.github-link:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+.github-link svg {
+  flex-shrink: 0;
 }
