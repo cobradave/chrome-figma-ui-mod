@@ -1,6 +1,8 @@
 
 const function1 = document.getElementById('button1');
 const function2 = document.getElementById('button2');
+const buttonExportJSON = document.getElementById('buttonExportJSON');
+const buttonExportMd = document.getElementById('buttonExportMd');
   
 async function getCurrentTab() {
     const queryOptions = { active: true, currentWindow: true };
@@ -50,4 +52,16 @@ function1.addEventListener('click', async () => {
   
     // Send a message to the content script in the current tab to execute the script
     chrome.tabs.sendMessage(currentTab.id, 'executeScript');
+  });
+
+  // Export as JSON
+  buttonExportJSON.addEventListener('click', async function () {
+    const currentTab = await getCurrentTab();
+    chrome.tabs.sendMessage(currentTab.id, 'exportJSON');
+  });
+
+  // Export as Markdown
+  buttonExportMd.addEventListener('click', async function () {
+    const currentTab = await getCurrentTab();
+    chrome.tabs.sendMessage(currentTab.id, 'exportMarkdown');
   });
