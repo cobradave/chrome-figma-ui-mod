@@ -9,9 +9,20 @@ const scanComponentsBtn = document.getElementById('scanComponents');
 const componentSelectorEl = document.getElementById('componentSelector');
 const componentDropdownEl = document.getElementById('componentDropdown');
 const scrapeBtn = document.getElementById('scrape');
+
+// Library-level export elements (all components)
+const libraryExportSection = document.getElementById('libraryExportSection');
+const exportLibraryCsvBtn = document.getElementById('exportLibraryCsv');
+const exportLibraryJsonBtn = document.getElementById('exportLibraryJson');
+const exportLibraryMdBtn = document.getElementById('exportLibraryMd');
+
+// Component-level export elements (single component)
+const componentExportSection = document.getElementById('componentExportSection');
+const componentExportLabel = document.getElementById('componentExportLabel');
 const exportCsvBtn = document.getElementById('exportCsv');
 const exportJsonBtn = document.getElementById('exportJson');
 const exportMdBtn = document.getElementById('exportMd');
+
 const previewEl = document.getElementById('preview');
 const previewContentEl = document.getElementById('previewContent');
 
@@ -19,14 +30,30 @@ const previewContentEl = document.getElementById('previewContent');
 scanComponentsBtn.addEventListener('click', scanComponents);
 componentDropdownEl.addEventListener('change', onComponentSelect);
 scrapeBtn.addEventListener('click', scrapeVariants);
+
+// Library-level exports
+exportLibraryCsvBtn.addEventListener('click', () => exportLibraryData('csv'));
+exportLibraryJsonBtn.addEventListener('click', () => exportLibraryData('json'));
+exportLibraryMdBtn.addEventListener('click', () => exportLibraryData('md'));
+
+// Component-level exports
 exportCsvBtn.addEventListener('click', () => exportData('csv'));
 exportJsonBtn.addEventListener('click', () => exportData('json'));
 exportMdBtn.addEventListener('click', () => exportData('md'));
 
+// ──────────────────────────────────────────────
 // Scan for components (All Components view)
+// ──────────────────────────────────────────────
 async function scanComponents() {
   setStatus('Scanning for components...', 'info');
   scanComponentsBtn.disabled = true;
+
+  // Reset component-level state
+  scrapedData = null;
+  selectedComponent = null;
+  componentExportSection.style.display = 'none';
+  previewEl.style.display = 'none';
+  scrapeBtn.disabled = true;
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -54,7 +81,10 @@ async function scanComponents() {
     populateDropdown(componentList);
     componentSelectorEl.style.display = 'block';
     
-    setStatus(`Found ${componentList.length} components. Select one from the dropdown.`, 'success');
+    // Show library-level export buttons
+    libraryExportSection.style.display = 'block';
+    
+    setStatus(`Found ${componentList.length} components. Export all, or select one for detailed stats.`, 'success');
   } catch (err) {
     console.error('Scan error:', err);
     setStatus('Error: ' + err.message, 'error');
@@ -86,6 +116,9 @@ function onComponentSelect() {
   if (selectedName === '') {
     selectedComponent = null;
     scrapeBtn.disabled = true;
+    // Hide component-level export when deselecting
+    componentExportSection.style.display = 'none';
+    previewEl.style.display = 'none';
     return;
   }
   
@@ -96,10 +129,16 @@ function onComponentSelect() {
   }
   
   scrapeBtn.disabled = false;
+  // Hide component export until they scrape
+  componentExportSection.style.display = 'none';
+  previewEl.style.display = 'none';
+  scrapedData = null;
   setStatus(`Selected: ${selectedComponent.name}. Navigate to its variants in Figma, then click "Scrape Variants".`, 'info');
 }
 
+// ──────────────────────────────────────────────
 // Scrape variants for selected component
+// ──────────────────────────────────────────────
 async function scrapeVariants() {
   if (!selectedComponent) {
     setStatus('Please select a component first.', 'error');
@@ -135,9 +174,9 @@ async function scrapeVariants() {
     data.componentName = selectedComponent.name;
     scrapedData = data;
     
-    exportCsvBtn.disabled = false;
-    exportJsonBtn.disabled = false;
-    exportMdBtn.disabled = false;
+    // Show component-level export buttons with dynamic label
+    componentExportSection.style.display = 'block';
+    componentExportLabel.textContent = `Export: ${selectedComponent.name}`;
     
     showPreview(data);
     const countInfo = data.expectedCount ? ` (expected ${data.expectedCount})` : '';
@@ -150,52 +189,125 @@ async function scrapeVariants() {
   scrapeBtn.disabled = false;
 }
 
-// Function to scan for component list (runs in Figma page)
-function scrapeComponentListFromPage() {
+// ──────────────────────────────────────────────
+// Injected: Scan for component list (runs in Figma page)
+// ──────────────────────────────────────────────
+async function scrapeComponentListFromPage() {
   try {
     const components = [];
     const seenNames = new Set();
     
-    console.log('[ComponentScan] Starting scan...');
+    console.log('[ComponentScan] Starting scan with auto-scroll...');
     
-    const allElements = document.querySelectorAll('*');
-    
-    for (const el of allElements) {
-      const text = el.innerText?.trim();
-      if (!text) continue;
-      
-      if (text.length > 300 || text.length < 10) continue;
-      if (!text.includes('❖')) continue;
-      
-      const numbers = text.match(/\b([\d,]{1,10})\b/g);
-      if (!numbers || numbers.length < 1) continue;
-      if (el.querySelectorAll('*').length > 20) continue;
-      
-      const nameMatch = text.match(/❖[^\n\t]+/);
-      if (!nameMatch) continue;
-      
-      let compName = nameMatch[0].trim();
-      compName = compName.replace(/\s+[\d,]+$/, '').trim();
-      
-      if (compName.length < 3 || compName.length > 80) continue;
-      if (seenNames.has(compName)) continue;
-      
-      const validNumbers = numbers.filter(n => parseInt(n.replace(/,/g, '')) > 0);
-      const instanceCount = validNumbers[0] || '';
-      
-      seenNames.add(compName);
-      components.push({
-        name: compName,
-        instances: instanceCount,
-      });
-      
-      if (components.length <= 5) {
-        console.log('[ComponentScan] Found:', compName, '|', instanceCount);
+    const extractComponents = () => {
+      let foundNew = false;
+      const allElements = document.querySelectorAll('*');
+      for (const el of allElements) {
+        const text = el.innerText?.trim();
+        if (!text) continue;
+        if (text.length > 300 || text.length < 2) continue;
+        
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        // A single component row shouldn't have more than 8 lines of text
+        if (lines.length < 2 || lines.length > 8) continue;
+
+        const firstLine = lines[0];
+        // Component name shouldn't be a pure number or generic status
+        if (/^[\d,]+$/.test(firstLine) || firstLine === '-' || firstLine === 'N/A') continue;
+        
+        // Exclude table headers
+        const lowerFirst = firstLine.toLowerCase();
+        if (lowerFirst === 'component' || lowerFirst.includes('total instances') || lowerFirst.includes('used by')) continue;
+
+        let numIdx = -1;
+        for (let i = 1; i < lines.length; i++) {
+           if (/^[\d,]+$/.test(lines[i]) || lines[i] === '-' || lines[i] === '0') {
+              numIdx = i;
+              break;
+           }
+        }
+
+        if (numIdx === -1) continue; // No instance count found
+
+        let compName = firstLine.replace(/\s+[\d,]+$/, '').trim();
+        if (compName.length < 2 || compName.length > 80) continue;
+        
+        // Ignore generic Figma UI elements that might look like component rows
+        if (['filter', 'columns', 'export', 'cancel', 'save', 'done', 'close', 'search'].includes(compName.toLowerCase())) continue;
+
+        if (seenNames.has(compName)) continue;
+
+        let extraText = '';
+        if (numIdx > 1) {
+           extraText = lines.slice(1, numIdx).join(' ');
+        }
+        
+        const instanceStr = lines[numIdx];
+        const instanceCount = (instanceStr === '-' || instanceStr === '') ? '0' : instanceStr;
+
+        seenNames.add(compName);
+        components.push({
+          name: compName,
+          instances: instanceCount,
+          badge: extraText
+        });
+        foundNew = true;
+        console.log(`[ComponentScan] Found: ${compName} | Ex: ${extraText} | Inst: ${instanceCount}`);
+      }
+      return foundNew;
+    };
+
+    extractComponents();
+
+    let scrollContainer = null;
+    let maxScroll = 0;
+    const allElems = document.querySelectorAll('*');
+    for (const el of allElems) {
+      if (el.scrollHeight > el.clientHeight && el.clientHeight > 100) {
+        if (el.tagName !== 'BODY' && el.tagName !== 'HTML') {
+          const style = window.getComputedStyle(el);
+          const isScrollable = style.overflowY === 'auto' || style.overflowY === 'scroll' || style.overflowY === 'overlay' || style.overflow === 'auto' || style.overflow === 'scroll';
+          if (isScrollable) {
+            if (el.scrollHeight > maxScroll) {
+              maxScroll = el.scrollHeight;
+              scrollContainer = el;
+            }
+          }
+        }
       }
     }
-    
-    console.log('[ComponentScan] Total components found:', components.length);
-    
+
+    if (scrollContainer) {
+      console.log('[ComponentScan] Found scrollable list, auto-scrolling to collect all...');
+      scrollContainer.scrollTop = 0;
+      await new Promise(r => setTimeout(r, 300));
+      extractComponents();
+
+      let lastScroll = -1;
+      let noNewComponentsCount = 0;
+
+      while (true) {
+        lastScroll = scrollContainer.scrollTop;
+        scrollContainer.scrollTop += scrollContainer.clientHeight * 0.8;
+        await new Promise(r => setTimeout(r, 500));
+        
+        const newlyFound = extractComponents();
+        
+        if (scrollContainer.scrollTop === lastScroll) {
+          break; // Reached bottom
+        }
+        
+        if (!newlyFound) {
+          noNewComponentsCount++;
+          if (noNewComponentsCount > 2) break;
+        } else {
+          noNewComponentsCount = 0;
+        }
+      }
+    }
+
+    console.log('[ComponentScan] Total components collected:', components.length);
+
     if (components.length === 0) {
       return { error: 'No components found. Make sure you\'re on the Library Analytics "All Components" view.' };
     }
@@ -206,7 +318,9 @@ function scrapeComponentListFromPage() {
   }
 }
 
-// This function runs in the context of the Figma page - scrapes variant data
+// ──────────────────────────────────────────────
+// Injected: Scrape variant data (runs in Figma page)
+// ──────────────────────────────────────────────
 function scrapeLibraryAnalyticsFromPage() {
   try {
     console.log('[VariantScraper] Starting variant scrape...');
@@ -308,7 +422,9 @@ function scrapeLibraryAnalyticsFromPage() {
   }
 }
 
-// Analyze property usage from variant data
+// ──────────────────────────────────────────────
+// Analysis: Property usage from variant data
+// ──────────────────────────────────────────────
 function analyzePropertyUsage(variants) {
   const properties = {};
   let totalInstances = 0;
@@ -351,6 +467,9 @@ function analyzePropertyUsage(variants) {
   return { properties: result, totalInstances };
 }
 
+// ──────────────────────────────────────────────
+// Preview
+// ──────────────────────────────────────────────
 function showPreview(data) {
   previewEl.style.display = 'block';
   
@@ -385,9 +504,92 @@ function showPreview(data) {
 }
 
 // ──────────────────────────────────────────────
-// Export: CSV, JSON, Markdown
+// Export: Library-level (all components)
 // ──────────────────────────────────────────────
+function exportLibraryData(format) {
+  if (!componentList || componentList.length === 0) return;
+  
+  const timestamp = new Date().toISOString().split('T')[0];
+  const exportPayload = {
+    libraryName: 'Library Analytics',
+    viewType: 'All Components',
+    componentCount: componentList.length,
+    components: componentList,
+    scrapedAt: new Date().toISOString(),
+  };
+  
+  if (format === 'csv') {
+    const csv = generateLibraryCsv(exportPayload);
+    downloadFile(csv, `library-analytics-${timestamp}.csv`, 'text/csv;charset=utf-8;');
+  } else if (format === 'json') {
+    const json = JSON.stringify(exportPayload, null, 2);
+    downloadFile(json, `library-analytics-${timestamp}.json`, 'application/json');
+  } else if (format === 'md') {
+    const md = generateLibraryMarkdown(exportPayload);
+    downloadFile(md, `library-analytics-${timestamp}.md`, 'text/markdown');
+  }
+  
+  setStatus(`Exported all ${componentList.length} components as ${format.toUpperCase()}!`, 'success');
+}
 
+function generateLibraryCsv(data) {
+  const rows = [];
+  
+  // Header metadata
+  rows.push(['Library Analytics Export']);
+  rows.push(['Exported', new Date(data.scrapedAt).toLocaleString()]);
+  rows.push(['Total Components', data.componentCount]);
+  rows.push([]);
+  
+  // Component data table
+  rows.push(['Component', 'Instances']);
+  
+  // Sort by instance count descending
+  const sorted = [...data.components].sort((a, b) => {
+    const aNum = parseInt(a.instances?.replace(/,/g, '') || '0');
+    const bNum = parseInt(b.instances?.replace(/,/g, '') || '0');
+    return bNum - aNum;
+  });
+  
+  for (const comp of sorted) {
+    rows.push([comp.name, comp.instances || '0']);
+  }
+  
+  // Escape and join
+  return rows
+    .map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+}
+
+function generateLibraryMarkdown(data) {
+  let md = `# Library Analytics - All Components\n\n`;
+  md += `**Exported:** ${new Date(data.scrapedAt).toLocaleString()}\n`;
+  md += `**Total Components:** ${data.componentCount}\n\n`;
+  
+  md += `## Component Usage\n\n`;
+  md += `| # | Component | Instances |\n`;
+  md += `|---|-----------|----------|\n`;
+  
+  // Sort by instance count descending
+  const sorted = [...data.components].sort((a, b) => {
+    const aNum = parseInt(a.instances?.replace(/,/g, '') || '0');
+    const bNum = parseInt(b.instances?.replace(/,/g, '') || '0');
+    return bNum - aNum;
+  });
+  
+  sorted.forEach((comp, i) => {
+    md += `| ${i + 1} | ${comp.name} | ${comp.instances || '0'} |\n`;
+  });
+  
+  md += `\n---\n\n`;
+  md += `*Exported from Figma Analytics Export (formerly Figma UI Mod)*\n`;
+  
+  return md;
+}
+
+// ──────────────────────────────────────────────
+// Export: Component-level (single component variants)
+// ──────────────────────────────────────────────
 function exportData(format) {
   if (!scrapedData) return;
   
@@ -408,7 +610,7 @@ function exportData(format) {
     downloadFile(md, `${safeName}-analytics-${timestamp}.md`, 'text/markdown');
   }
   
-  setStatus(`Exported as ${format.toUpperCase()}!`, 'success');
+  setStatus(`Exported ${scrapedData.componentName} as ${format.toUpperCase()}!`, 'success');
 }
 
 function generateCsv(data) {
@@ -478,22 +680,12 @@ function generateMarkdown(data) {
   }
   
   // Variant table
-  if (data.viewType === 'All Components') {
-    md += `## Component Usage\n\n`;
-    md += `| Component | Variants | Instances (30d) | Inserts (30d) | Detaches (30d) |\n`;
-    md += `|-----------|----------|-----------------|---------------|----------------|\n`;
-    
-    for (const v of data.variants) {
-      md += `| ${v.name} | ${v.variantCount || '-'} | ${v.totalInstances} | ${v.inserts || '-'} | ${v.detaches || '-'} |\n`;
-    }
-  } else {
-    md += `## Variant Usage (All Combinations)\n\n`;
-    md += `| Variant | Total Instances | Inserts (30d) | Detaches (30d) |\n`;
-    md += `|---------|-----------------|---------------|----------------|\n`;
-    
-    for (const v of data.variants) {
-      md += `| ${v.name} | ${v.totalInstances} | ${v.inserts || '-'} | ${v.detaches || '-'} |\n`;
-    }
+  md += `## Variant Usage (All Combinations)\n\n`;
+  md += `| Variant | Total Instances | Inserts (30d) | Detaches (30d) |\n`;
+  md += `|---------|-----------------|---------------|----------------|\n`;
+  
+  for (const v of data.variants) {
+    md += `| ${v.name} | ${v.totalInstances} | ${v.inserts || '-'} | ${v.detaches || '-'} |\n`;
   }
   
   md += `\n---\n\n`;
@@ -502,6 +694,9 @@ function generateMarkdown(data) {
   return md;
 }
 
+// ──────────────────────────────────────────────
+// Utilities
+// ──────────────────────────────────────────────
 function downloadFile(content, filename, mimeType) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);

@@ -14,6 +14,14 @@
 
   <button id="scanComponents" class="primary">1. Scan Components</button>
 
+  <!-- Library-level export (all components) — shown after scan -->
+  <div id="libraryExportSection" class="export-section" style="display: none;">
+    <div class="export-divider"><span>Export All Components</span></div>
+    <button id="exportLibraryCsv" class="secondary">Export CSV (All Components)</button>
+    <button id="exportLibraryJson" class="secondary">Export JSON (All Components)</button>
+    <button id="exportLibraryMd" class="secondary">Export Markdown (All Components)</button>
+  </div>
+
   <div id="componentSelector" style="display: none; margin: 12px 0;">
     <label class="selector-label">Select Component:</label>
     <select id="componentDropdown">
@@ -26,11 +34,12 @@
 
   <button id="scrape" class="secondary" disabled>2. Scrape Variants</button>
 
-  <div class="export-section">
-    <div class="export-divider"><span>Export</span></div>
-    <button id="exportCsv" class="secondary" disabled>Export CSV</button>
-    <button id="exportJson" class="secondary" disabled>Export JSON</button>
-    <button id="exportMd" class="secondary" disabled>Export Markdown</button>
+  <!-- Component-level export (single component) — shown after scraping variants -->
+  <div id="componentExportSection" class="export-section" style="display: none;">
+    <div class="export-divider"><span id="componentExportLabel">Export Component</span></div>
+    <button id="exportCsv" class="secondary">Export CSV</button>
+    <button id="exportJson" class="secondary">Export JSON</button>
+    <button id="exportMd" class="secondary">Export Markdown</button>
   </div>
 
   <div id="preview" class="preview" style="display: none;">
@@ -39,7 +48,7 @@
   </div>
 
   <div class="footer">
-    <div class="footer-hint">Open Library Analytics → Select a component → Click Scrape</div>
+    <div class="footer-hint">Scan → Export All, or Select a component → Scrape → Export</div>
     <div class="footer-links">
       <a href="https://github.com/NoWorries/chrome-figma-ui-mod" target="_blank" class="github-link">
         <svg width="14" height="14" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
