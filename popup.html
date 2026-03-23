@@ -12,7 +12,7 @@
     Open Library Analytics in Figma, then click "Scan Components".
   </div>
 
-  <button id="scanComponents" class="primary">1. Scan Components</button>
+  <button id="scanComponents" class="primary">Scan Main Component List</button>
 
   <!-- Library-level export (all components) — shown after scan -->
   <div id="libraryExportSection" class="export-section" style="display: none;">
@@ -22,17 +22,9 @@
     <button id="exportLibraryMd" class="secondary">Export Markdown (All Components)</button>
   </div>
 
-  <div id="componentSelector" style="display: none; margin: 12px 0;">
-    <label class="selector-label">Select Component:</label>
-    <select id="componentDropdown">
-      <option value="">-- Select a component --</option>
-    </select>
-    <div class="selector-hint">
-      Then navigate to this component in Figma and click "Scrape Variants"
-    </div>
-  </div>
+  <div class="export-divider"><span>CLICK COMPONENT FOR VARIANT STATS</span></div>
 
-  <button id="scrape" class="secondary" disabled>2. Scrape Variants</button>
+  <button id="scrape" class="primary">Scrape Current Component Variants</button>
 
   <!-- Component-level export (single component) — shown after scraping variants -->
   <div id="componentExportSection" class="export-section" style="display: none;">

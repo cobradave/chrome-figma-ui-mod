@@ -6,8 +6,6 @@ let selectedComponent = null;
 // Elements
 const statusEl = document.getElementById('status');
 const scanComponentsBtn = document.getElementById('scanComponents');
-const componentSelectorEl = document.getElementById('componentSelector');
-const componentDropdownEl = document.getElementById('componentDropdown');
 const scrapeBtn = document.getElementById('scrape');
 
 // Library-level export elements (all components)
@@ -28,7 +26,6 @@ const previewContentEl = document.getElementById('previewContent');
 
 // Event listeners
 scanComponentsBtn.addEventListener('click', scanComponents);
-componentDropdownEl.addEventListener('change', onComponentSelect);
 scrapeBtn.addEventListener('click', scrapeVariants);
 
 // Library-level exports
@@ -50,10 +47,8 @@ async function scanComponents() {
 
   // Reset component-level state
   scrapedData = null;
-  selectedComponent = null;
   componentExportSection.style.display = 'none';
   previewEl.style.display = 'none';
-  scrapeBtn.disabled = true;
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -78,13 +73,11 @@ async function scanComponents() {
     }
 
     componentList = data.components;
-    populateDropdown(componentList);
-    componentSelectorEl.style.display = 'block';
     
     // Show library-level export buttons
     libraryExportSection.style.display = 'block';
     
-    setStatus(`Found ${componentList.length} components. Export all, or select one for detailed stats.`, 'success');
+    setStatus(`Found ${componentList.length} components. You can export them directly.`, 'success');
   } catch (err) {
     console.error('Scan error:', err);
     setStatus('Error: ' + err.message, 'error');
@@ -93,58 +86,10 @@ async function scanComponents() {
   scanComponentsBtn.disabled = false;
 }
 
-function populateDropdown(components) {
-  componentDropdownEl.innerHTML = '<option value="">-- Select a component --</option>';
-  
-  // Sort by instance count (descending)
-  const sorted = [...components].sort((a, b) => {
-    const aNum = parseInt(a.instances?.replace(/,/g, '') || '0');
-    const bNum = parseInt(b.instances?.replace(/,/g, '') || '0');
-    return bNum - aNum;
-  });
-  
-  sorted.forEach((comp) => {
-    const option = document.createElement('option');
-    option.value = comp.name;
-    option.textContent = `${comp.name} (${comp.instances || '?'} instances)`;
-    componentDropdownEl.appendChild(option);
-  });
-}
-
-function onComponentSelect() {
-  const selectedName = componentDropdownEl.value;
-  if (selectedName === '') {
-    selectedComponent = null;
-    scrapeBtn.disabled = true;
-    // Hide component-level export when deselecting
-    componentExportSection.style.display = 'none';
-    previewEl.style.display = 'none';
-    return;
-  }
-  
-  selectedComponent = componentList.find(c => c.name === selectedName);
-  if (!selectedComponent) {
-    setStatus('Component not found. Try scanning again.', 'error');
-    return;
-  }
-  
-  scrapeBtn.disabled = false;
-  // Hide component export until they scrape
-  componentExportSection.style.display = 'none';
-  previewEl.style.display = 'none';
-  scrapedData = null;
-  setStatus(`Selected: ${selectedComponent.name}. Navigate to its variants in Figma, then click "Scrape Variants".`, 'info');
-}
-
 // ──────────────────────────────────────────────
 // Scrape variants for selected component
 // ──────────────────────────────────────────────
-async function scrapeVariants() {
-  if (!selectedComponent) {
-    setStatus('Please select a component first.', 'error');
-    return;
-  }
-  
+async function scrapeVariants() {  
   setStatus('Scraping variants...', 'info');
   scrapeBtn.disabled = true;
 
@@ -154,6 +99,7 @@ async function scrapeVariants() {
     const results = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: scrapeLibraryAnalyticsFromPage,
+      args: [] // Pass empty args, the script will guess name from UI
     });
 
     const data = results[0]?.result;
@@ -170,17 +116,15 @@ async function scrapeVariants() {
       return;
     }
 
-    // Use selected component name
-    data.componentName = selectedComponent.name;
     scrapedData = data;
     
     // Show component-level export buttons with dynamic label
     componentExportSection.style.display = 'block';
-    componentExportLabel.textContent = `Export: ${selectedComponent.name}`;
+    componentExportLabel.textContent = `Export: ${data.componentName}`;
     
     showPreview(data);
     const countInfo = data.expectedCount ? ` (expected ${data.expectedCount})` : '';
-    setStatus(`Found ${data.variants.length} variants for ${selectedComponent.name}${countInfo}`, 'success');
+    setStatus(`Found ${data.variants.length} variants for ${data.componentName}${countInfo}`, 'success');
   } catch (err) {
     console.error('Scrape error:', err);
     setStatus('Error: ' + err.message, 'error');
@@ -327,6 +271,13 @@ function scrapeLibraryAnalyticsFromPage() {
     
     const allText = document.body.innerText;
     
+    let componentName = 'Exported Component';
+    // Try to extract the component name from the Figma breadcrumb
+    const breadcrumbMatch = allText.match(/(?:Library|File)\s*analytics\s*[\/\\]\s*([^\n]+)/i);
+    if (breadcrumbMatch) {
+       componentName = breadcrumbMatch[1].replace(/All variants/i, '').trim();
+    }
+    
     const variantsMatch = allText.match(/Showing\s*(\d+)\s*variants/i);
     const expectedCount = variantsMatch ? parseInt(variantsMatch[1]) : 0;
     console.log('[VariantScraper] Expected variants:', expectedCount);
@@ -347,7 +298,19 @@ function scrapeLibraryAnalyticsFromPage() {
     const variants = [];
     const seenNames = new Set();
     
-    const allElements = document.querySelectorAll('*');
+    // Figma leaves the original "All Components" list in the background DOM when the variant modal is open.
+    // To prevent scraping background components as variants, we find the deepest container that encapsulates 
+    // BOTH the modal headers and modal footers.
+    let modalContainer = document.body;
+    const allNodes = document.querySelectorAll('*');
+    for (const el of allNodes) {
+       const txt = el.innerText;
+       if (txt?.includes('Inserts (30 days)') && txt?.includes('Showing') && txt?.match(/\bvariants\b/i)) {
+          modalContainer = el;
+       }
+    }
+    
+    const allElements = modalContainer.querySelectorAll('*');
     
     for (const el of allElements) {
       const text = el.innerText?.trim();
@@ -356,44 +319,37 @@ function scrapeLibraryAnalyticsFromPage() {
       if (text.length > 300 || text.length < 20) continue;
       if (el.querySelectorAll('*').length > 15) continue;
       
-      const isVariant = text.includes('=') || text.match(/\bdefault\b/i);
-      if (!isVariant) continue;
-      if (text.includes('❖')) continue;
-      if (text.includes(' / ')) continue;
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      // A variant row should have at least the name and 3 stats (Instances, Inserts, Detaches)
+      // e.g. ["Primary, Hover", "123", "-", "1"] -> length 4
+      if (lines.length < 4 || lines.length > 8) continue;
       
-      const numbers = text.match(/\b([\d,]+)\b/g);
-      if (!numbers || numbers.length < 3) continue;
-      if (numbers.length > 6) continue;
+      // Check if the last 3 lines are numbers or dashes
+      const last3 = lines.slice(-3);
+      const areStats = last3.every(l => /^[\d,]+$/.test(l) || l === '-' || l === '0' || l === 'N/A');
+      if (!areStats) continue;
       
-      let nameEndPos = text.length;
-      for (const num of numbers) {
-        if (num.replace(/,/g, '').length >= 1) {
-          const pos = text.indexOf(num);
-          if (pos > 10 && pos < nameEndPos) {
-            nameEndPos = pos;
-            break;
-          }
-        }
-      }
-      
-      let variantName = text.substring(0, nameEndPos).trim();
+      let variantName = lines.slice(0, lines.length - 3).join(' ');
       variantName = variantName.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
       
-      if (variantName.length < 5) continue;
-      if (seenNames.has(variantName)) continue;
+      // Filters to prevent capturing background main components, charts, and breadcrumbs that Figma leaves in the hidden DOM layer
+      if (variantName.includes('❖') || variantName.includes('✦')) continue;
+      if (/^[\d,\s\-]+$/.test(variantName)) continue; // ignore chart axes (purely numbers/dashes)
+      if (variantName.toLowerCase().includes('variants')) continue; // ignore table headers/counts
       
-      const lastThree = numbers.slice(-3);
+      if (variantName.length < 2) continue;
+      if (seenNames.has(variantName)) continue;
       
       seenNames.add(variantName);
       variants.push({
         name: variantName,
-        totalInstances: lastThree[0] || '0',
-        inserts: lastThree[1] || '0',
-        detaches: lastThree[2] || '0',
+        totalInstances: (last3[0] === '-' || last3[0] === 'N/A') ? '0' : last3[0],
+        inserts: (last3[1] === '-' || last3[1] === 'N/A') ? '0' : last3[1],
+        detaches: (last3[2] === '-' || last3[2] === 'N/A') ? '0' : last3[2],
       });
       
       if (variants.length <= 5) {
-        console.log('[VariantScraper] Found:', variantName.substring(0, 40), '|', lastThree);
+        console.log('[VariantScraper] Found:', variantName.substring(0, 40), '|', last3);
       }
     }
     
@@ -408,7 +364,7 @@ function scrapeLibraryAnalyticsFromPage() {
     }
 
     return {
-      componentName: 'Selected Component',
+      componentName: componentName,
       totalInstances: totalInstances,
       usedBy: usedBy,
       usedIn: usedIn,
@@ -433,33 +389,44 @@ function analyzePropertyUsage(variants) {
     const count = parseInt(variant.totalInstances?.replace(/,/g, '') || '0');
     totalInstances += count;
     
+    // Figma formats variants as comma separated Key=Value arrays
     const parts = variant.name.split(',').map(p => p.trim());
-    let positionIndex = 0;
-    const positionNames = ['state1', 'state2', 'color'];
+    let positionIndex = 1;
     
     for (const part of parts) {
+      let propName, propValue;
+      
       if (part.includes('=')) {
-        const [propName, propValue] = part.split('=').map(s => s.trim());
-        if (!properties[propName]) properties[propName] = {};
-        properties[propName][propValue] = (properties[propName][propValue] || 0) + count;
-      } else if (positionIndex < positionNames.length) {
-        const propName = positionNames[positionIndex];
-        const propValue = part.replace(/\s*\(default\)/g, '').trim();
-        if (!properties[propName]) properties[propName] = {};
-        properties[propName][propValue] = (properties[propName][propValue] || 0) + count;
+        [propName, propValue] = part.split('=').map(s => s.trim());
+      } else {
+        // Fallback for unnamed positional variants
+        propName = `Property ${positionIndex}`;
+        propValue = part.replace(/\s*\(default\)/g, '').trim();
         positionIndex++;
       }
+      
+      if (!propName || !propValue) continue;
+
+      if (!properties[propName]) properties[propName] = {};
+      properties[propName][propValue] = (properties[propName][propValue] || 0) + count;
     }
   }
   
   const result = {};
   for (const [propName, values] of Object.entries(properties)) {
     const sorted = Object.entries(values)
-      .map(([value, count]) => ({
-        value,
-        count,
-        percent: totalInstances > 0 ? ((count / totalInstances) * 100).toFixed(1) : '0'
-      }))
+      .map(([value, count]) => {
+        let p = '0';
+        if (totalInstances > 0) {
+          let exact = (count / totalInstances) * 100;
+          p = Math.round(exact).toString(); 
+        }
+        return {
+          value,
+          count,
+          percent: p
+        };
+      })
       .sort((a, b) => b.count - a.count);
     result[propName] = sorted;
   }
