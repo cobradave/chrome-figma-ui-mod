@@ -1,0 +1,11 @@
+/* Toolbar popup on non-Figma tabs — overrides popup.css shell sizing */
+body {
+  min-width: 240px;
+  max-width: 280px;
+  min-height: 0;
+  padding: 14px 16px 16px;
+}
+
+.detection-card {
+  margin-bottom: 0;
+}

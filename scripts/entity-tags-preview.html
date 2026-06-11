@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
+  <title>Entity tags — panel preview</title>
+  <link rel="stylesheet" href="../popup.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: var(--color-text-strong);
+    }
+    .intro {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin: 0 0 24px;
+    }
+    section {
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--color-muted);
+      margin: 0 0 12px;
+    }
+    .panel-frame {
+      width: 360px;
+      padding: 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+    .tag-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tag-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .tag-row__name {
+      flex: 0 0 120px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+    .tag-row__icon-only img,
+    .tag-row__icon-only svg {
+      width: 12px;
+      height: 12px;
+      display: block;
+    }
+    .examples {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .example-label {
+      font-size: 11px;
+      color: var(--color-muted);
+      margin-bottom: 6px;
+    }
+    .section-note {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin: -8px 0 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Entity tag icons</h1>
+    <p class="intro">Figma icons trimmed to content (viewBox 5 5 14 14), displayed at 12px in panel tags.</p>
+
+    <section>
+      <h2>All tags</h2>
+      <div class="panel-frame tag-grid" id="allTags"></div>
+    </section>
+
+    <section>
+      <h2>Panel context (360px)</h2>
+      <p class="section-note">Library as a small breadcrumb; the viewed item as the primary title; compact entity tag on the line below (variants read “Variant of [component set name]”).</p>
+      <div class="examples">
+        <div>
+          <div class="example-label">Components list</div>
+          <div class="panel-frame view-ident">
+            <div class="view-ident__breadcrumb">Foundation • Web</div>
+            <div class="view-ident__title">Component list</div>
+          </div>
+        </div>
+        <div>
+          <div class="example-label">Component set detail</div>
+          <div class="panel-frame view-ident">
+            <div class="view-ident__breadcrumb">Foundation • Web</div>
+            <div class="view-ident__title">List/Item</div>
+            <div class="view-ident__subtitle view-ident__item-line">
+              <span class="view-ident__entity-label view-ident__entity-label--componentSet" data-kind="componentSet"></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="example-label">Variant file usage (variant of component set tag)</div>
+          <div class="panel-frame view-ident">
+            <div class="view-ident__breadcrumb">Foundation • Web</div>
+            <div class="view-ident__title">Size=Large, State=Default</div>
+            <div class="view-ident__subtitle view-ident__item-line">
+              <span class="view-ident__variant-of">Variant of</span>
+              <span class="view-ident__entity-label view-ident__entity-label--componentSet view-ident__entity-label--named" id="variantComponentSetTag"></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="example-label">Long variant name (title wraps, tag truncates)</div>
+          <div class="panel-frame view-ident">
+            <div class="view-ident__breadcrumb">Foundation • Web</div>
+            <div class="view-ident__title">Size=Extra Large, State=Hover, Icon=Visible, Badge=New, Disabled=False, Loading=True</div>
+            <div class="view-ident__subtitle view-ident__item-line">
+              <span class="view-ident__variant-of">Variant of</span>
+              <span class="view-ident__entity-label view-ident__entity-label--componentSet view-ident__entity-label--named" id="longVariantComponentSetTag"></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="example-label">Style detail</div>
+          <div class="panel-frame view-ident">
+            <div class="view-ident__breadcrumb">Foundation • Web</div>
+            <div class="view-ident__title">Text/Heading/Large</div>
+            <div class="view-ident__subtitle view-ident__item-line">
+              <span class="view-ident__entity-label view-ident__entity-label--style" data-kind="style"></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="example-label">Variable detail</div>
+          <div class="panel-frame view-ident">
+            <div class="view-ident__breadcrumb">Foundation • Web</div>
+            <div class="view-ident__title">color/brand/primary</div>
+            <div class="view-ident__subtitle view-ident__item-line">
+              <span class="view-ident__entity-label view-ident__entity-label--variable" data-kind="variable"></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="example-label">Single component file usage</div>
+          <div class="panel-frame view-ident">
+            <div class="view-ident__breadcrumb">Foundation • Web</div>
+            <div class="view-ident__title">Avatar</div>
+            <div class="view-ident__subtitle view-ident__item-line">
+              <span class="view-ident__entity-label view-ident__entity-label--component" data-kind="component"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Extra icons (catalog)</h2>
+      <div class="panel-frame tag-grid" id="extraTags"></div>
+    </section>
+  </div>
+
+  <script src="../shared/view-labels.js"></script>
+  <script src="../shared/entity-icon-inline.js"></script>
+  <script src="../shared/entity-icons.js"></script>
+  <script>
+    const iconBase = '../shared/entity-icons/';
+
+    function mountTag(el) {
+      EntityIcons.applyEntityLabel(el, el.dataset.kind);
+    }
+
+    function mountNamedTag(el, kind, name) {
+      el.hidden = false;
+      el.className = `view-ident__entity-label view-ident__entity-label--${kind} view-ident__entity-label--named`;
+      el.replaceChildren();
+      const iconEl = document.createElement('span');
+      iconEl.className = 'view-ident__entity-label-icon';
+      iconEl.innerHTML = EntityIcons.getIconInlineHtml(kind);
+      const textEl = document.createElement('span');
+      textEl.className = 'view-ident__entity-label-text';
+      textEl.textContent = name;
+      el.append(iconEl, textEl);
+    }
+
+    document.querySelectorAll('[data-kind]').forEach(mountTag);
+
+    const variantComponentSetTag = document.getElementById('variantComponentSetTag');
+    if (variantComponentSetTag) {
+      mountNamedTag(variantComponentSetTag, 'componentSet', 'List/Item');
+    }
+
+    const longVariantComponentSetTag = document.getElementById('longVariantComponentSetTag');
+    if (longVariantComponentSetTag) {
+      mountNamedTag(longVariantComponentSetTag, 'componentSet', 'Navigation/Header/App Shell/Toolbar');
+    }
+
+    const allKinds = Object.keys(EntityIcons.ENTITY_KIND_ICONS);
+    const allTagsEl = document.getElementById('allTags');
+    allKinds.forEach((kind) => {
+      const row = document.createElement('div');
+      row.className = 'tag-row';
+      row.innerHTML =
+        `<span class="tag-row__name">${EntityIcons.ENTITY_ICON_LABELS[kind] || kind}</span>` +
+        `<span class="tag-row__icon-only"><img src="${iconBase}${EntityIcons.ENTITY_KIND_ICONS[kind]}" alt="" width="${EntityIcons.ENTITY_ICON_SIZE}" height="${EntityIcons.ENTITY_ICON_SIZE}"></span>` +
+        `<span data-kind="${kind}"></span>`;
+      allTagsEl.appendChild(row);
+      mountTag(row.querySelector('[data-kind]'));
+    });
+
+    const extraKinds = ['variableMode', 'figma'];
+    const extraTagsEl = document.getElementById('extraTags');
+    extraKinds.forEach((kind) => {
+      const row = document.createElement('div');
+      row.className = 'tag-row';
+      row.innerHTML =
+        `<span class="tag-row__name">${EntityIcons.ENTITY_ICON_LABELS[kind]}</span>` +
+        `<span class="tag-row__icon-only"><img src="${iconBase}${EntityIcons.ENTITY_ICON_CATALOG[kind]}" alt="" width="${EntityIcons.ENTITY_ICON_SIZE}" height="${EntityIcons.ENTITY_ICON_SIZE}"></span>`;
+      extraTagsEl.appendChild(row);
+    });
+  </script>
+</body>
+</html>

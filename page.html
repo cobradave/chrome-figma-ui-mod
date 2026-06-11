@@ -4,14 +4,48 @@
 <link rel="stylesheet" href="https://unpkg.com/simpledotcss/simple.min.css">
   </head>
   <body class="">
-    <header><h1 id="figma-ui-mod">Figma UI Mod</h1>
-    <p>Export figma library analytics and enable UI customisation.</p>
-    <p>Version: 1.4.0</p>
+    <header><h1 id="figma-analytics-export">Figma Analytics Export</h1>
+    <p>Export Figma Library Analytics to CSV, JSON, or Markdown. Formerly Figma UI Mod.</p>
+    <p>Version: 1.6.8</p>
 </header><main
 > <h2>Updates</h2>
+<p><b>v1.6.8</b> - 9 June 2026
+  <ul>
+      <li>Markdown exports: names with <code>|</code> no longer break tables</li>
+    </ul></p>
+<p><b>v1.6.7</b> - 8 June 2026
+  <ul>
+      <li><b>Panel insights</b> — charts and maintainer notes in the side panel; optional include in exports</li>
+      <li><b>Libraries path</b> — fixed library name and component list detection</li>
+      <li>Improved variant extraction and special-character handling</li>
+  </ul></p>
+<p><b>v1.6.0</b> - 1 June 2026
+  <ul>
+      <li><b>Automatic view detection</b> — the side panel identifies your current view (component list, variant detail, file usage, styles, variables, modes) and updates as you navigate</li>
+      <li><b>Contextual Download button</b> — one click exports the current view; scanning happens automatically (replaces separate scan/scrape steps)</li>
+      <li><b>Guidance cards</b> explain what to do next; <b>Switch to Analytics</b> clicks the Analytics tab in Figma when you are on Overview</li>
+      <li><b>Expanded exports</b> — Styles and Variables (including <b>Modes</b>) lists and detail views; per-file usage for variants, single components without variants, styles, and variables</li>
+      <li><b>All launch paths supported</b> — workspace thumbnail, in-file Library menu, and Libraries browser</li>
+      <li><b>Modal launcher</b> — open the side panel from a button in the Library Analytics modal header</li>
+      <li><b>Inline export</b> — CSV, JSON, and Markdown buttons in the modal while the side panel is open</li>
+      <li><b>Variables / Modes control</b> — switch the Usage statistics sub-tab from the panel</li>
+      <li><b>Complete lists</b> — auto-scrolls virtualized tables so long component, style, and variable lists export in full</li>
+      <li>Detection runs only while the side panel is open; remembers your last export format</li>
+  </ul></p>
+<p><b>v1.5.0</b> - 15 March 2026
+  <ul>
+      <li>Renamed from <b>Figma UI Mod</b> to <b>Figma Analytics Export</b></li>
+      <li><b>Chrome side panel</b> replaces the toolbar popup — opens beside your Figma tab</li>
+      <li>Unified export workflow in the side panel with a <b>CSV / JSON / Markdown</b> format picker</li>
+      <li>Property usage analysis retained in variant exports across all three formats</li>
+  </ul></p>
 <p><b>v1.4.0</b> - 15 February 2026
   <ul>
-      <li>Added JSON and Markdown export formats alongside the existing CSV export</li><li>Added property usage analysis — shows breakdown of variant property values with instance counts and percentages</li><li>"Download JSON" and "Download Markdown" buttons are injected inline into the analytics modal alongside the existing "Download analytics" button</li></ul></p>
+      <li>Added JSON and Markdown export formats alongside the existing CSV export</li>
+      <li>Added <b>property usage analysis</b> — the first analytics insights: variant property value counts and percentages in exports (<a href="https://github.com/cobradave">Davy Fung</a>)</li>
+      <li>"Download JSON" and "Download Markdown" buttons are injected inline into the analytics modal alongside the existing "Download analytics" button</li>
+  </ul></p>
+<p><i>Contributor: <a href="https://github.com/cobradave">Davy Fung</a> — JSON and Markdown export formats, property usage analysis (foundation for panel insights), and initiated the move to a Chrome side panel (v1.5.0)</i></p>
 <p><b>v1.3.1</b> - 14 October 2025
   <ul>
       <li>Fixed issue preventing CSV export for component analytics. Updated the UI mod styles to fix container width issue.</li></ul></p>
@@ -29,23 +63,31 @@
         <li>Fixed issue preventing CSV export. UI3 changes broke the JS matching.</li><li>Added this page to communicate updates to the extension.</li></ul></p>
         <hr>
     <h2>Features</h2>
-    <h3 id="export-library-analytics-as-csv">&#128202; Export library analytics as CSV</h3>
-   <p></p>Export your complete <a href="https://help.figma.com/hc/en-us/articles/360039238353-View-and-explore-library-analytics">library analytics</a> overview and detailed component reports</p><p><mark><b>Notes</b></mark></p><ul><li>Library analytics feature requires Organisation or Enterprise plan</li><li>The library analytics modal needs to be visible on screen to extract the information.</li></ul>
+    <h3 id="export-library-analytics">&#128202; Export Library Analytics (CSV, JSON, Markdown)</h3>
+   <p>Export your complete <a href="https://help.figma.com/hc/en-us/articles/360039238353-View-and-explore-library-analytics">library analytics</a> from a Chrome side panel that detects what you are viewing and offers a one-click download.</p>
+   <p><b>Supported views:</b></p>
+   <ul>
+    <li><b>Components</b> — full list, variant detail (with property usage analysis), variant file usage, single-component file usage</li>
+    <li><b>Styles</b> — full list and per-style file usage</li>
+    <li><b>Variables</b> — variables list, modes list, and per-variable file usage</li>
+   </ul>
+   <p><b>How it works:</b></p>
+   <ul>
+    <li>Open Library Analytics in Figma, then open the side panel from the toolbar or the modal launcher button</li>
+    <li>The panel shows which library and view you are on, and enables Download when export is available</li>
+    <li>Choose CSV, JSON, or Markdown; inline export buttons also appear in the modal while the panel is open</li>
+    <li>Works from the workspace, inside a design file, or via the Libraries browser</li>
+   </ul>
+   <p><mark><b>Notes</b></mark></p><ul><li>Library analytics requires an Organisation or Enterprise plan</li><li>The library analytics modal must be open and the Analytics tab selected</li><li>Detection runs only while the side panel is open</li></ul>
 
-    <h3 id="export-library-analytics-json-md">&#128202; Export library analytics as JSON / Markdown</h3>
-   <p>In addition to CSV, you can now export analytics as JSON or Markdown. The export includes property usage analysis, showing which variant property values are most common with instance counts and percentages. Both options are available from the popup and as inline buttons in the analytics modal.</p>
+    <h3 id="panel-insights">&#128161; Panel insights</h3>
+   <p>While you browse Library Analytics, the side panel shows usage charts and maintainer notes — top items, zero-instance candidates, variant matrix signals, unused property values, detach rates, and more. Insights load automatically after the table is scanned.</p>
+   <p>Check <b>Include insights</b> before downloading to append the same analysis to CSV, JSON, or Markdown exports (optional; off by default).</p>
+   <p>Property usage analysis for variant detail — variant property value counts and percentages — was first added in v1.4.0 by <a href="https://github.com/cobradave">Davy Fung</a>. v1.6.7 expanded this into full panel insights across list and detail views.</p>
 
-    <h3 id="enable-several-css-overrides">&#9881; Enable several CSS overrides</h3>
-    <p>Adjust the Figma UI to make better of available space on larger viewports. </p>
-    <ul>
-    <li>Doubled the width of the Properties Panel (Right hand sidebar) - reduce truncation</li>
-    <li>Wider Select Dropdowns - reduce truncation</li>
-    <li>Increased the size of File Preview thumbnail - more space due to the wider sidebar</li>
-    <li>Added horizontal scroll to the Layer List - avoid truncation of layer names</li>
-    <li>Increased the size of Library Analytics modal - instead of a narrow modal it now takes up the full viewport</li>
-    <li>Full screen branch review modal</li>
-    <li>Swap instance picker enlarged - reduce truncation</li>
-    </ul><p><mark><b>Notes</b></mark></p><ul><li>This was released before UI3, the UI customisation may behave unpredictably</li></ul>
+    <h3 id="property-usage-analysis">&#128200; Property usage analysis</h3>
+   <p>When exporting variant detail for a component set, the export includes a breakdown of variant property values with instance counts and percentages — available in CSV, JSON, and Markdown. Part of the broader panel insights system since v1.6.7.</p>
+
     <h3 id="js-bookmarklet-alternative-to-chrome-extension-">JS Bookmarklet</h3>
     <p>For anyone unable to install browser extensions due to security policies, here is a <a href="https://gist.github.com/NoWorries/5c1763d6ad2ec784366d23b0880ae666">javascript bookmarklet</a> you can use to export the Figma Analytics.</p>
     

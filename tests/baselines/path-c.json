@@ -1,0 +1,26 @@
+{
+  "description": "Path C baseline — Libraries button → Design Foundations → Foundation • Web → Analytics",
+  "launchContext": "libraries",
+  "libraryName": "Foundation • Web",
+  "url": "https://www.figma.com/files/713083859032680705?fuid=1146202324494220388",
+  "notes": [
+    "URL unchanged from workspace root — not a reliable launch-path signal",
+    "dialog aria-label is null on Path C; library name from h2 heading",
+    "Tab labels duplicated: Libraries\\nLibraries, Analytics\\nAnalytics",
+    "Libraries and Analytics tabs can both have aria-selected=true",
+    "library_item_view-- CSS prefix not always present; use Libraries+Overview+Analytics tab triad"
+  ],
+  "probeSnapshot": {
+    "dialogLabel": null,
+    "hasComponentStats": true,
+    "hasLibraryItemView": false,
+    "tabs": ["Libraries", "Overview", "Analytics"]
+  },
+  "views": {
+    "components-list": {
+      "kind": "components",
+      "depth": "list",
+      "markers": ["Component statistics", "603 library components shown"]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "Path B baseline — in-file menu → Library → Library analytics",
+  "launchContext": "inFile",
+  "libraryName": "Foundation • Web",
+  "urlPattern": "/design/{fileKey}/",
+  "exampleUrl": "https://www.figma.com/design/4YLjes8hJHKjWhHuwxYwG8/Foundation-%E2%80%A2-Web",
+  "notes": [
+    "URL is /design/... not /files/... — used only for launchContext diagnostic",
+    "Tabs: Overview | Analytics only (no Libraries tab)",
+    "Breadcrumb may show File analytics / or Library analytics / — useful for extractItemName on detail",
+    "Analytics content should match Path A once on components list"
+  ],
+  "views": {
+    "components-list": {
+      "kind": "components",
+      "depth": "list",
+      "markers": ["Component statistics", "library components shown"]
+    }
+  }
+}

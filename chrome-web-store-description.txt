@@ -1,0 +1,66 @@
+# Chrome Web Store listing copy
+# Listing: https://chromewebstore.google.com/detail/figma-ui-mod/pakkdlcbmijjkcocojcgonopnbkeolle
+# Paste the sections below into the developer dashboard (plain text; bullets use •).
+# Summary field limit: 132 characters.
+# Update this file when you update page.html / README.md changelogs.
+# Version in manifest.json: 1.6.8
+
+=== SUMMARY ===
+Export Figma Library Analytics to CSV, JSON, or Markdown from a Chrome side panel.
+
+=== DESCRIPTION ===
+Export Library Analytics data from Figma to CSV, JSON, or Markdown. Open a Chrome side panel beside your Figma tab — it detects what you are viewing and offers a one-click download.
+
+Changes
+• 9 June 2026: Markdown exports — names with | no longer break tables.
+• 8 June 2026: Panel insights in the side panel (optional in exports). Libraries path: library name and list detection fixes. Better variant extraction and special-character handling.
+• 1 June 2026: Automatic view detection — the side panel identifies your current view and updates as you navigate. Contextual Download button — one click exports the current view; scanning happens automatically. Expanded exports — Styles and Variables (including Modes) lists and detail views; per-file usage for variants, single components, styles, and variables. Modal launcher — open the side panel from a button in the Library Analytics modal header. Inline export — CSV, JSON, and Markdown buttons in the modal while the side panel is open. Complete lists — auto-scrolls virtualized tables so long lists export in full.
+• 15 March 2026: Renamed to Figma Analytics Export. Chrome side panel replaces the toolbar popup. Unified CSV / JSON / Markdown format picker in the side panel.
+• 15 February 2026: Added JSON and Markdown export formats alongside CSV. Property usage analysis — first analytics insights: variant property value counts and percentages in exports (Davy Fung).
+
+Export Library Analytics (CSV, JSON, Markdown)
+• Components — full list, variant detail (with property usage analysis), variant file usage, single-component file usage
+• Styles — full list and per-style file usage
+• Variables — variables list, modes list, and per-variable file usage
+• Panel insights — usage charts and maintainer notes in the side panel; optionally include the same analysis in exports
+
+How it works
+• Open Library Analytics in Figma, then open the side panel from the toolbar or the modal launcher button
+• The panel shows which library and view you are on, and enables Download when export is available
+• Choose CSV, JSON, or Markdown; inline export buttons also appear in the modal while the panel is open
+• Works from the workspace, inside a design file, or via the Libraries browser
+
+Notes
+• Library analytics requires an Organisation or Enterprise Figma plan
+• The library analytics modal must be open and the Analytics tab selected
+• Detection runs only while the side panel is open
+
+For anyone unable to install browser extensions due to security policies, a javascript bookmarklet is available: https://gist.github.com/NoWorries/5c1763d6ad2ec784366d23b0880ae666
+
+=== PREVIOUS LIVE LISTING (v1.3.1, October 2025 — archived for reference) ===
+Summary: Figma UI enhancements and Analytics CSV export
+
+Description:
+Provide powerful options for Figma users, including:
+
+Changes
+• 14 October 2025: Fixed issue preventing CSV export for component analytics. Updated the UI mod styles to fix container width issue.
+• 27 April 2025: Fixed issue preventing CSV export for component analytics. Added inline download button to the analytic modals.
+• 10 March 2025: Fixed issue preventing CSV export. Added export of style analytics.
+• 11 November 2024: Fixed issue preventing CSV export. Corrected "undefined" library title in Org Analytics modal.
+• 23 September: Fixed issue preventing CSV export.
+• 12 August: Fixed issue preventing CSV export.
+
+1) Export Analytics as CSV
+• Export library analytics as CSV
+• Export component analytics as CSV
+Note: Analytics modal needs to be visible on screen
+
+2) Enable several CSS overrides to adjust the Figma UI to make better of available space on larger viewports:
+• Doubled the width of the Properties Panel (Right hand sidebar) – reduce truncation
+• Wider Select Dropdowns – reduce truncation
+• Increased the size of File Preview thumbnail – more space due to the wider sidebar
+• Added horizontal scroll to the Layer List – avoid truncation of layer names
+• Increased the size of Library Analytics modal – instead of a narrow modal it now takes up the full viewport
+• Full size branch review modal
+• Swap instance picker enlarged – reduce truncation

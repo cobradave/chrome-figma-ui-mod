@@ -1,0 +1,56 @@
+:root {
+  --panel-footer-muted: #666;
+  --panel-footer-border: #eee;
+  --panel-footer-surface-muted: #f0f0f0;
+  --panel-footer-text: #333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --panel-footer-muted: #a0a0a0;
+    --panel-footer-border: #3a3a3a;
+    --panel-footer-surface-muted: #333;
+    --panel-footer-text: #e8e8e8;
+  }
+}
+
+.panel-footer {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--panel-footer-border);
+  text-align: left;
+}
+
+.panel-footer__links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.panel-footer__github-link,
+.panel-footer__feedback-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  color: var(--panel-footer-muted);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.panel-footer__github-link {
+  gap: 6px;
+}
+
+.panel-footer__github-link:hover,
+.panel-footer__feedback-link:hover {
+  background: var(--panel-footer-surface-muted);
+  color: var(--panel-footer-text);
+}
+
+.panel-footer__github-link svg {
+  flex-shrink: 0;
+}

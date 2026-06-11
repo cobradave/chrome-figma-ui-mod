@@ -1,0 +1,15 @@
+{
+  "name": "chrome-figma-ui-mod",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "package": "node scripts/package-extension.mjs",
+    "previews": "node scripts/generate-panel-previews.mjs && node scripts/serve-panel-previews.mjs",
+    "previews:build": "node scripts/generate-panel-previews.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0",
+    "vitest": "^3.0.0"
+  }
+}

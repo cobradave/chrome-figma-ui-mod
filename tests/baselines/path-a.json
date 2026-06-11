@@ -1,0 +1,45 @@
+{
+  "description": "Path A baseline — workspace thumbnail → Library analytics (Foundation • Web)",
+  "launchContext": "workspace",
+  "libraryName": "Foundation • Web",
+  "views": {
+    "components-list": {
+      "kind": "components",
+      "depth": "list",
+      "itemCount": 603,
+      "markers": ["Component statistics", "603 library components shown"]
+    },
+    "components-detail": {
+      "kind": "components",
+      "depth": "detail",
+      "itemName": "List/Item",
+      "variantCount": 24,
+      "markers": ["Showing 24 variants", "asset_file_view_header--name--"]
+    },
+    "styles-list": {
+      "kind": "styles",
+      "depth": "list",
+      "itemCount": 67,
+      "markers": ["Style statistics", "67 library styles shown"]
+    },
+    "styles-detail": {
+      "kind": "styles",
+      "depth": "detail",
+      "itemName": "body/small-regular",
+      "markers": ["asset_file_view_header--name--"]
+    },
+    "variables-list": {
+      "kind": "variables",
+      "depth": "list",
+      "itemCount": 338,
+      "markers": ["Usage statistics", "338 library variables shown", "Variables", "Modes"]
+    },
+    "variables-detail": {
+      "kind": "variables",
+      "depth": "detail",
+      "itemName": "color/text/default",
+      "markers": ["asset_file_view_header--name--", "Sort by column: File name"]
+    }
+  },
+  "notes": "Path B/C baselines pending — breadcrumb may appear on in-file launch path"
+}

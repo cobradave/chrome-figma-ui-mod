@@ -2,55 +2,107 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
   <title>Figma Analytics Export</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="shared/panel-footer.css">
 </head>
 <body>
-  <h1><span>📊</span> Figma Analytics Export</h1>
-
-  <div id="status" class="status info">
-    Open Library Analytics in Figma, then click "Scan Components".
+  <div id="panelLoader" class="panel-loader" hidden aria-live="polite" aria-label="Updating view">
+    <span class="panel-loader__icon" aria-hidden="true"></span>
   </div>
 
-  <button id="scanComponents" class="primary">Scan Main Component List</button>
-
-  <!-- Library-level export (all components) — shown after scan -->
-  <div id="libraryExportSection" class="export-section" style="display: none;">
-    <div class="export-divider"><span>Export All Components</span></div>
-    <button id="exportLibraryCsv" class="secondary">Export CSV (All Components)</button>
-    <button id="exportLibraryJson" class="secondary">Export JSON (All Components)</button>
-    <button id="exportLibraryMd" class="secondary">Export Markdown (All Components)</button>
-  </div>
-
-  <div class="export-divider"><span>CLICK COMPONENT FOR VARIANT STATS</span></div>
-
-  <button id="scrape" class="primary">Scrape Current Component Variants</button>
-
-  <!-- Component-level export (single component) — shown after scraping variants -->
-  <div id="componentExportSection" class="export-section" style="display: none;">
-    <div class="export-divider"><span id="componentExportLabel">Export Component</span></div>
-    <button id="exportCsv" class="secondary">Export CSV</button>
-    <button id="exportJson" class="secondary">Export JSON</button>
-    <button id="exportMd" class="secondary">Export Markdown</button>
-  </div>
-
-  <div id="preview" class="preview" style="display: none;">
-    <h3>Preview</h3>
-    <div id="previewContent"></div>
-  </div>
-
-  <div class="footer">
-    <div class="footer-hint">Scan → Export All, or Select a component → Scrape → Export</div>
-    <div class="footer-links">
-      <a href="https://github.com/NoWorries/chrome-figma-ui-mod" target="_blank" class="github-link">
-        <svg width="14" height="14" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="currentColor"/>
-        </svg>
-        formerly Figma UI Mod by @NoWorries
-      </a>
+  <div id="viewIdent" class="view-ident" hidden>
+    <div id="viewBreadcrumb" class="view-ident__breadcrumb"></div>
+    <div id="viewTitle" class="view-ident__title"></div>
+    <div id="viewSubtitle" class="view-ident__subtitle view-ident__item-line" hidden>
+      <span id="viewVariantOfPrefix" class="view-ident__variant-of" hidden>Variant of</span>
+      <span id="viewSubtitleText" hidden></span>
+      <span id="viewEntityLabel" class="view-ident__entity-label" hidden></span>
+    </div>
+    <div id="typeBlock" class="view-ident__subtab-block" hidden>
+      <div class="control-label">Type</div>
+      <div id="typeSegmented" class="format-segmented view-ident__subtab-segmented" role="radiogroup" aria-label="Analytics type">
+        <button type="button" class="format-segment" data-type="components" role="radio" aria-checked="false">Components</button>
+        <button type="button" class="format-segment" data-type="styles" role="radio" aria-checked="false">Styles</button>
+        <button type="button" class="format-segment" data-type="variables" role="radio" aria-checked="false">Variables</button>
+      </div>
+    </div>
+    <div id="durationBlock" class="view-ident__subtab-block" hidden>
+      <div class="control-label">Duration</div>
+      <div id="durationSegmented" class="format-segmented view-ident__subtab-segmented view-ident__duration-segmented" role="radiogroup" aria-label="Analytics duration">
+        <button type="button" class="format-segment" data-duration="30" role="radio" aria-checked="false">30 days</button>
+        <button type="button" class="format-segment" data-duration="60" role="radio" aria-checked="false">60 days</button>
+        <button type="button" class="format-segment" data-duration="90" role="radio" aria-checked="false">90 days</button>
+        <button type="button" class="format-segment" data-duration="year" role="radio" aria-checked="false">Year</button>
+      </div>
     </div>
   </div>
 
+  <div id="variablesSubTabBlock" class="view-ident__subtab-block" hidden>
+    <div id="variablesSubTabSegmented" class="format-segmented view-ident__subtab-segmented" role="radiogroup" aria-label="Variables list tab">
+      <button type="button" class="format-segment" data-subtab="variables" role="radio" aria-checked="true">
+        <span class="format-segment__icon" data-segment-icon="variable" aria-hidden="true"></span>
+        <span class="format-segment__label">Variables</span>
+      </button>
+      <button type="button" class="format-segment" data-subtab="modes" role="radio" aria-checked="false">
+        <span class="format-segment__icon" data-segment-icon="variableMode" aria-hidden="true"></span>
+        <span class="format-segment__label">Modes</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="detectionCard" class="detection-card detection-waiting" role="status" aria-live="polite" hidden>
+    <div id="statusIcon" class="detection-card__icon" aria-hidden="true">○</div>
+    <div class="detection-card__body">
+      <div id="statusTitle" class="detection-card__title">Looking for Library Analytics</div>
+      <div id="statusDetail" class="detection-card__detail">
+        Open the analytics modal in Figma. This panel updates automatically.
+      </div>
+      <button id="switchAnalyticsTabBtn" type="button" class="detection-card__action primary" hidden>
+        Switch to Analytics
+      </button>
+    </div>
+  </div>
+
+  <div id="feedback" class="feedback" hidden role="status" aria-live="polite"></div>
+
+  <div id="panelInsights" class="panel-insights" hidden></div>
+
+  <div id="actionBlock" class="action-block" hidden>
+    <div id="actionBlockContent" class="action-block__content">
+      <div class="control-label">Export as</div>
+      <div id="formatSegmented" class="format-segmented" role="radiogroup" aria-label="Export format">
+        <button type="button" class="format-segment is-selected" data-format="csv" role="radio" aria-checked="true">CSV</button>
+        <button type="button" class="format-segment" data-format="json" role="radio" aria-checked="false">JSON</button>
+        <button type="button" class="format-segment" data-format="md" role="radio" aria-checked="false">Markdown</button>
+      </div>
+      <label id="includeInsightsBlock" class="include-insights" hidden>
+        <input id="includeInsightsCheckbox" type="checkbox">
+        <span>Include insights</span>
+      </label>
+      <button id="downloadBtn" class="primary" disabled>
+        <span class="download-btn__icon" data-segment-icon="export" aria-hidden="true"></span>
+        <span id="downloadBtnLabel" class="download-btn__label">Download unavailable</span>
+      </button>
+    </div>
+    <div id="actionBlockSkeleton" class="action-block__skeleton panel-skeleton" hidden aria-hidden="true">
+      <div class="panel-skeleton__line panel-skeleton__line--label"></div>
+      <div class="panel-skeleton__line panel-skeleton__line--segmented"></div>
+      <div class="panel-skeleton__line panel-skeleton__line--checkbox"></div>
+      <div class="panel-skeleton__line panel-skeleton__line--button"></div>
+    </div>
+  </div>
+
+  <script src="shared/panel-footer.js"></script>
+  <script src="shared/panel-insights-expand.js"></script>
+  <script src="shared/figma-url.js"></script>
+  <script src="shared/view-labels.js"></script>
+  <script src="shared/entity-icon-inline.js"></script>
+  <script src="shared/entity-icons.js"></script>
+  <script src="shared/view-transition.js"></script>
+  <script src="shared/insights.js"></script>
+  <script src="shared/export-format.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
